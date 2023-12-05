@@ -119,6 +119,7 @@ def scan_a(track_requests, head):
         track_requests.append(MAX - 1)
     track_requests.sort();
     right = [req for req in track_requests if req <= head]
+    right.reverse()
     left = [req for req in track_requests if req > head]
     left.insert(0, head)
     new_track = left + right
