@@ -32,6 +32,7 @@ def main():
         inquirer.Text('initial_track',message="Initial Track"),
         inquirer.Text('track_requests',message="Track Requests")
     ]
+    
     answers = inquirer.prompt(main_prompt)
     algorithm = answers['algorithm']
     track_requests = answers['track_requests'].strip().split(' ')
@@ -48,11 +49,14 @@ def main():
         y, total = sstf(track_requests, initial_track)
         y.insert(0, initial_track)
     elif (algorithm == 'SCAN (Elevator) Algorithm'):
-        x.append(len(x))
+        if MAX - 1 not in track_requests:
+            x.append(len(x))
         y, total = scan_a(track_requests, initial_track)
     elif (algorithm == 'C-SCAN Algorithm'):
-        x.append(len(x))
-        x.append(len(x))
+        if 0 not in track_requests:
+            x.append(len(x))
+        if MAX - 1 not in track_requests:
+            x.append(len(x))
         y, total = c_scan(track_requests, initial_track)
     elif (algorithm == 'LOOK Algorithm'):
         y, total = look(track_requests, initial_track)
@@ -109,68 +113,38 @@ def sstf(requests, head):
     print('total', total_track_time)
     return result_order, total_track_time
 
-def scan_a(requests, start_position):
-    total_seek_count = 0
-    seek_sequence = []
-    requests.append(MAX - 1)
-    requests.sort()
-    print(requests)
-    left_requests = [r for r in requests if r < start_position]
-    right_requests = [r for r in requests if r >= start_position]
-
-    seek_sequence.append(start_position)
-
-    for request in right_requests:
-        seek_sequence.append(request)
-        total_seek_count += abs(request - start_position)
-        start_position = request
-
-    for request in reversed(left_requests):
-        seek_sequence.append(request)
-        total_seek_count += abs(request - start_position)
-        start_position = request
-    print(seek_sequence)
-    return seek_sequence, total_seek_count
-
-def scan(track_requests, head_position):
-    track_requests.sort()
-    total_track_time = 0
-    current_head_position = head_position
-    result_order = []
-
-    # Move towards the end
-    for request in track_requests:
-        if request >= current_head_position:
-            total_track_time += abs(request - current_head_position)
-            current_head_position = request
-            result_order.append(request)
-
-    # Move towards the beginning
-    for request in reversed(track_requests):
-        if request < current_head_position:
-            total_track_time += abs(request - current_head_position)
-            current_head_position = request
-            result_order.append(request)
-
-    return result_order, total_track_time
-
-
-def c_scan(track_requests, head):
+def scan_a(track_requests, head):
     total = 0
-    track_requests.append(0)
-    track_requests.append(MAX - 1)
+    if MAX - 1 not in track_requests:
+        track_requests.append(MAX - 1)
     track_requests.sort();
     right = [req for req in track_requests if req <= head]
     left = [req for req in track_requests if req > head]
-    new_track = left + right
     left.insert(0, head)
+    new_track = left + right
+    print(new_track)
+    for i in range(0, len(new_track) - 1):
+        print(abs(new_track[i] - new_track[i + 1]))
+        total += abs(new_track[i] - new_track[i + 1]) 
+
+    return new_track, total
+
+def c_scan(track_requests, head):
+    total = 0
+    if 0 not in track_requests:
+        track_requests.append(0)
+    if MAX - 1 not in track_requests:
+        track_requests.append(MAX - 1)
+    track_requests.sort();
+    right = [req for req in track_requests if req <= head]
+    left = [req for req in track_requests if req > head]
+    left.insert(0, head)
+    new_track = left + right
 
     for i in range(0, len(new_track) - 1):
         total += abs(new_track[i] - new_track[i + 1]) 
+        print(total)
 
-    print("l + r", left + right)
-
-    total += abs(track_requests[0] - head)
     return new_track, total
 
 def look(track_requests, head):
